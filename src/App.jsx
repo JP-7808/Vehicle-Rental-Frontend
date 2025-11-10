@@ -27,6 +27,16 @@ import VendorBookings from './pages/vendor/VendorBookings';
 import VendorProfile from './pages/vendor/VendorProfile';
 import AddVehicle from './pages/vendor/AddVehicle';
 
+// Admin
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminVendors from './pages/admin/AdminVendors';
+import AdminVehicles from './pages/admin/AdminVehicles';
+import AdminBookings from './pages/admin/AdminBookings';
+import AdminPayments from './pages/admin/AdminPayments';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminSettings from './pages/admin/AdminSettings';
+
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { user, loading } = useAuth();
   
@@ -148,6 +158,63 @@ function App() {
             <ProtectedRoute requiredRole="vendor">
               <Layout>
                 <VendorProfile />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminUsers />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/vendors" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminVendors />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/vehicles" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminVehicles />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/bookings" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminBookings />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/payments" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminPayments />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/analytics" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminAnalytics />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <AdminSettings />
               </Layout>
             </ProtectedRoute>
           } />
