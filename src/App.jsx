@@ -17,6 +17,8 @@ import Home from './pages/customer/Home';
 import VehicleSearch from './pages/customer/VehicleSearch';
 import VehicleDetails from './pages/customer/VehicleDetails';
 import Booking from './pages/customer/Booking';
+import BookingDetails from './pages/customer/BookingDetails';
+import Payment from './pages/customer/Payment'; // ADD THIS IMPORT
 import MyBookings from './pages/customer/MyBookings';
 import Profile from './pages/customer/Profile';
 
@@ -103,10 +105,24 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
-          <Route path="/bookings/:id" element={
+          <Route path="/bookings/:id" element={ // CHANGED FROM /bookings/:id to /booking
             <ProtectedRoute requiredRole="customer">
               <Layout>
                 <Booking />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/bookings-details/:id" element={
+            <ProtectedRoute requiredRole="customer">
+              <Layout>
+                <BookingDetails />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/payment" element={ // ADD THIS ROUTE
+            <ProtectedRoute requiredRole="customer">
+              <Layout>
+                <Payment />
               </Layout>
             </ProtectedRoute>
           } />
@@ -161,6 +177,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
+          
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={
             <ProtectedRoute requiredRole="admin">

@@ -211,7 +211,7 @@ const MyBookings = () => {
 
                   <div className="mt-4 lg:mt-0 lg:ml-6 flex space-x-3">
                     <Link
-                      to={`/bookings/${booking._id}`}
+                      to={`/bookings-details/${booking._id}`}
                       className="btn-secondary text-sm flex items-center space-x-2"
                     >
                       <Eye className="h-4 w-4" />

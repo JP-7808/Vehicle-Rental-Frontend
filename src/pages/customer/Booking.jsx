@@ -63,6 +63,7 @@ const Booking = () => {
     }));
   };
 
+  // In your Booking.jsx, update the handleSubmit function:
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
