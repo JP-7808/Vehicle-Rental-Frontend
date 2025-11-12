@@ -382,36 +382,84 @@ const VehicleSearch = () => {
 };
 
 const VehicleCard = ({ vehicle }) => {
-    const VehicleIcon = {
-      car: Car,
-      bike: Bike,
-      bicycle: Bike, // Using Bike icon for bicycle
-      bus: Bus,
-      truck: Truck,
-    }[vehicle.vehicleType] || Car;
+  const VehicleIcon = {
+    car: Car,
+    bike: Bike,
+    bicycle: Bike,
+    bus: Bus,
+    truck: Truck,
+  }[vehicle.vehicleType] || Car;
 
-    return (
-      <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-300">
-        <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+  return (
+    <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      {/* Make the entire image area clickable */}
+      <Link to={`/vehicles/${vehicle._id}`}>
+        <div className="aspect-w-16 aspect-h-9 bg-gray-200 relative cursor-pointer">
           <img
             src={vehicle.images[0] || '/placeholder-vehicle.jpg'}
             alt={vehicle.title}
             className="w-full h-48 object-cover"
           />
+          <div className="absolute top-2 right-2">
+            <VehicleIcon className="h-5 w-5 text-white bg-black bg-opacity-50 rounded p-1" />
+          </div>
         </div>
+      </Link>
+      
+      <div className="p-4">
+        <Link 
+          to={`/vehicles/${vehicle._id}`}
+          className="hover:text-primary-600 transition-colors"
+        >
+          <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 mb-2">
+            {vehicle.title}
+          </h3>
+        </Link>
         
-        <div className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
-              {vehicle.title}
-            </h3>
-            <VehicleIcon className="h-5 w-5 text-gray-400 flex-shrink-0 ml-2" />
+        <div className="flex items-center text-gray-600 mb-2">
+          <MapPin className="h-4 w-4 mr-1" />
+          <span className="text-sm">
+            {vehicle.locations?.[0]?.city || 'Multiple cities'}
+          </span>
+        </div>
+
+        <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+          <span>{vehicle.seats} seats</span>
+          <span className="capitalize">{vehicle.transmission}</span>
+          <span className="capitalize">{vehicle.fuelType}</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1">
+            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+            <span className="text-sm text-gray-600">
+              {vehicle.vendor?.rating || 'New'}
+            </span>
           </div>
           
-          {/* ... rest of the VehicleCard JSX remains the same */}
+          <div className="text-right">
+            <div className="text-xl font-bold text-primary-600">
+              ₹{vehicle.pricing.baseDaily}
+              <span className="text-sm font-normal text-gray-600">/day</span>
+            </div>
+            {vehicle.pricing.depositAmount > 0 && (
+              <div className="text-xs text-gray-500">
+                + ₹{vehicle.pricing.depositAmount} deposit
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Add a dedicated View Details button */}
+        <Link 
+          to={`/vehicles/${vehicle._id}`}
+          className="w-full mt-3 btn-primary text-center block py-2 text-sm"
+        >
+          View Details
+        </Link>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default VehicleSearch;
