@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Car, Calendar, User, Menu, X,
-  LogOut, Building, Plus, BarChart3, DollarSign
+  LogOut, Building, Plus, BarChart3, DollarSign,
+  Settings, Shield, Banknote, FileText
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const VendorLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -19,14 +21,32 @@ const VendorLayout = ({ children }) => {
     { name: 'Add Vehicle', href: '/vendor/vehicles/add', icon: Plus },
     { name: 'Bookings', href: '/vendor/bookings', icon: Calendar },
     { name: 'Earnings', href: '/vendor/earnings', icon: DollarSign },
-    { name: 'Profile', href: '/vendor/profile', icon: User },
+    { name: 'Analytics', href: '/vendor/analytics', icon: BarChart3 },
+  ];
+
+  const settingsNavigation = [
+    { name: 'Business Profile', href: '/vendor/profile', icon: User, tab: 'profile' },
+    { name: 'Bank Details', href: '/vendor/profile', icon: Banknote, tab: 'bank' },
+    { name: 'KYC Verification', href: '/vendor/profile', icon: Shield, tab: 'kyc' },
+    { name: 'Account Settings', href: '/vendor/settings', icon: Settings },
   ];
 
   const isActive = (path) => location.pathname === path;
+  const isProfileTabActive = (tab) => location.pathname === '/vendor/profile' && location.hash === `#${tab}`;
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleSettingsNavigation = (href, tab = null) => {
+    if (tab) {
+      navigate(`${href}#${tab}`);
+    } else {
+      navigate(href);
+    }
+    setSettingsDropdownOpen(false);
+    setSidebarOpen(false);
   };
 
   return (
@@ -53,7 +73,7 @@ const VendorLayout = ({ children }) => {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-4">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -68,6 +88,47 @@ const VendorLayout = ({ children }) => {
                   <span>{item.name}</span>
                 </Link>
               ))}
+              
+              {/* Settings Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setSettingsDropdownOpen(!settingsDropdownOpen)}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    location.pathname === '/vendor/profile' || location.pathname === '/vendor/settings'
+                      ? 'text-green-600 bg-green-50 border border-green-200'
+                      : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>Settings</span>
+                </button>
+
+                {settingsDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">Account Settings</p>
+                      <p className="text-xs text-gray-500">Manage your vendor account</p>
+                    </div>
+                    
+                    <div className="py-1">
+                      {settingsNavigation.map((item) => (
+                        <button
+                          key={item.name}
+                          onClick={() => handleSettingsNavigation(item.href, item.tab)}
+                          className={`flex items-center space-x-3 w-full px-4 py-2 text-sm text-left transition-colors ${
+                            (item.tab ? isProfileTabActive(item.tab) : isActive(item.href))
+                              ? 'text-green-600 bg-green-50'
+                              : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* User Menu */}
@@ -122,7 +183,8 @@ const VendorLayout = ({ children }) => {
               </button>
             </div>
 
-            <nav className="p-4 space-y-2">
+            <nav className="p-4 space-y-1">
+              {/* Main Navigation */}
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -138,6 +200,29 @@ const VendorLayout = ({ children }) => {
                   <span>{item.name}</span>
                 </Link>
               ))}
+
+              {/* Settings Section Header */}
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  Settings
+                </p>
+                
+                {/* Settings Navigation */}
+                {settingsNavigation.map((item) => (
+                  <button
+                    key={item.name}
+                    onClick={() => handleSettingsNavigation(item.href, item.tab)}
+                    className={`flex items-center space-x-3 w-full px-3 py-3 rounded-lg text-sm font-medium text-left transition-colors ${
+                      (item.tab ? isProfileTabActive(item.tab) : isActive(item.href))
+                        ? 'text-green-600 bg-green-50 border border-green-200'
+                        : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.name}</span>
+                  </button>
+                ))}
+              </div>
             </nav>
 
             {/* User Info */}
@@ -173,14 +258,15 @@ const VendorLayout = ({ children }) => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <Building className="h-6 w-6 text-green-400" />
                 <span className="text-xl font-bold">Vendor Portal</span>
               </div>
-              <p className="text-gray-400">
-                Manage your vehicles, bookings, and earnings with our comprehensive vendor dashboard.
+              <p className="text-gray-400 max-w-md">
+                Manage your vehicles, bookings, earnings, and account settings with our comprehensive vendor dashboard.
+                Access KYC verification, bank details, and business profile management all in one place.
               </p>
             </div>
             
@@ -190,16 +276,19 @@ const VendorLayout = ({ children }) => {
                 <li><Link to="/vendor/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
                 <li><Link to="/vendor/vehicles" className="hover:text-white transition-colors">My Vehicles</Link></li>
                 <li><Link to="/vendor/bookings" className="hover:text-white transition-colors">Bookings</Link></li>
-                <li><Link to="/vendor/profile" className="hover:text-white transition-colors">Profile</Link></li>
+                <li><Link to="/vendor/earnings" className="hover:text-white transition-colors">Earnings</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-4">Support</h3>
+              <h3 className="text-lg font-semibold mb-4">Account & Support</h3>
               <div className="space-y-2 text-gray-400">
-                <p>Vendor Support: vendor@driveease.com</p>
+                <Link to="/vendor/profile" className="block hover:text-white transition-colors">Business Profile</Link>
+                <Link to="/vendor/profile#bank" className="block hover:text-white transition-colors">Bank Details</Link>
+                <Link to="/vendor/profile#kyc" className="block hover:text-white transition-colors">KYC Verification</Link>
+                <Link to="/vendor/settings" className="block hover:text-white transition-colors">Account Settings</Link>
+                <p className="pt-2">Support: vendor@driveease.com</p>
                 <p>Phone: +1 (555) 123-4567</p>
-                <p>Available 24/7 for vendor inquiries</p>
               </div>
             </div>
           </div>
@@ -209,6 +298,14 @@ const VendorLayout = ({ children }) => {
           </div>
         </div>
       </footer>
+
+      {/* Close dropdown when clicking outside */}
+      {settingsDropdownOpen && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setSettingsDropdownOpen(false)}
+        />
+      )}
     </div>
   );
 };
