@@ -1,11 +1,16 @@
-// src/pages/admin/AdminVendors.jsx
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, Filter, Eye, Edit, CheckCircle, XCircle, 
+  Search, Filter, Eye, CheckCircle, XCircle, 
   Building, Mail, Phone, MapPin, Calendar, Star,
-  AlertCircle
+  AlertCircle, FileText, Download, User
 } from 'lucide-react';
-import { getAllVendors, verifyVendorKYC, rejectVendorKYC, updateVendorStatus } from '../../services/adminApi';
+import { 
+  getAllVendors, 
+  verifyVendorKYC, 
+  rejectVendorKYC, 
+  updateVendorStatus,
+  getVendorDetails 
+} from '../../services/adminApi';
 
 const VendorCard = ({ vendor, onView, onVerify, onReject, onStatusChange }) => {
   const getStatusColor = (status) => {
@@ -172,6 +177,268 @@ const KYCModal = ({ vendor, isOpen, onClose, onAction, actionType }) => {
   );
 };
 
+const VendorDetailModal = ({ vendor, isOpen, onClose }) => {
+  if (!isOpen || !vendor) return null;
+
+  const handleDownloadDocument = (documentUrl, documentName) => {
+    if (documentUrl) {
+      const link = document.createElement('a');
+      link.href = documentUrl;
+      link.target = '_blank';
+      link.download = documentName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Vendor Details</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                  <p className="mt-1 text-sm text-gray-900">{vendor.companyName}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Contact Email</label>
+                  <p className="mt-1 text-sm text-gray-900">{vendor.contactEmail}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Contact Phone</label>
+                  <p className="mt-1 text-sm text-gray-900">{vendor.contactPhone}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <span className={`mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                    vendor.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {vendor.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Verified</label>
+                  <span className={`mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                    vendor.isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {vendor.isVerified ? 'Yes' : 'No'}
+                  </span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Rating</label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {vendor.rating || 0}/5 ({vendor.ratingCount || 0} reviews)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Address Information */}
+            {vendor.address && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Address Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {vendor.address.addressLine && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Address Line</label>
+                      <p className="mt-1 text-sm text-gray-900">{vendor.address.addressLine}</p>
+                    </div>
+                  )}
+                  {vendor.address.city && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">City</label>
+                      <p className="mt-1 text-sm text-gray-900">{vendor.address.city}</p>
+                    </div>
+                  )}
+                  {vendor.address.state && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">State</label>
+                      <p className="mt-1 text-sm text-gray-900">{vendor.address.state}</p>
+                    </div>
+                  )}
+                  {vendor.address.postalCode && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                      <p className="mt-1 text-sm text-gray-900">{vendor.address.postalCode}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* KYC Information */}
+            {vendor.kyc && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">KYC Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">KYC Status</label>
+                    <span className={`mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                      vendor.kyc.status === 'verified' ? 'bg-green-100 text-green-800' :
+                      vendor.kyc.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      vendor.kyc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {vendor.kyc.status?.charAt(0).toUpperCase() + vendor.kyc.status?.slice(1)}
+                    </span>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">ID Type</label>
+                    <p className="mt-1 text-sm text-gray-900">{vendor.kyc.idType || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">ID Number</label>
+                    <p className="mt-1 text-sm text-gray-900">{vendor.kyc.idNumber || 'N/A'}</p>
+                  </div>
+                  {vendor.kyc.submittedAt && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Submitted At</label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {new Date(vendor.kyc.submittedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                  {vendor.kyc.verifiedAt && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Verified At</label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {new Date(vendor.kyc.verifiedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                  {vendor.kyc.notes && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Notes</label>
+                      <p className="mt-1 text-sm text-gray-900">{vendor.kyc.notes}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* KYC Documents */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">KYC Documents</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {vendor.kyc.idDocumentUrl && (
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">ID Document</span>
+                          <FileText className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <button
+                          onClick={() => handleDownloadDocument(vendor.kyc.idDocumentUrl, 'id-document')}
+                          className="w-full bg-blue-50 text-blue-600 py-2 rounded text-sm hover:bg-blue-100 transition-colors flex items-center justify-center space-x-1"
+                        >
+                          <Download className="h-3 w-3" />
+                          <span>View Document</span>
+                        </button>
+                      </div>
+                    )}
+                    {vendor.kyc.businessProofUrl && (
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">Business Proof</span>
+                          <FileText className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <button
+                          onClick={() => handleDownloadDocument(vendor.kyc.businessProofUrl, 'business-proof')}
+                          className="w-full bg-blue-50 text-blue-600 py-2 rounded text-sm hover:bg-blue-100 transition-colors flex items-center justify-center space-x-1"
+                        >
+                          <Download className="h-3 w-3" />
+                          <span>View Document</span>
+                        </button>
+                      </div>
+                    )}
+                    {vendor.kyc.licenseUrl && (
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">License</span>
+                          <FileText className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <button
+                          onClick={() => handleDownloadDocument(vendor.kyc.licenseUrl, 'license')}
+                          className="w-full bg-blue-50 text-blue-600 py-2 rounded text-sm hover:bg-blue-100 transition-colors flex items-center justify-center space-x-1"
+                        >
+                          <Download className="h-3 w-3" />
+                          <span>View Document</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* User Information */}
+            {vendor.user && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">User Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Name</label>
+                    <p className="mt-1 text-sm text-gray-900">{vendor.user.name}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <p className="mt-1 text-sm text-gray-900">{vendor.user.email}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                    <p className="mt-1 text-sm text-gray-900">{vendor.user.phone}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">User Status</label>
+                    <span className={`mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                      vendor.user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {vendor.user.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Statistics */}
+            {vendor.statistics && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-gray-900">{vendor.statistics.totalVehicles || 0}</p>
+                    <p className="text-sm text-gray-600">Total Vehicles</p>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-gray-900">{vendor.statistics.totalBookings || 0}</p>
+                    <p className="text-sm text-gray-600">Total Bookings</p>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-gray-900">₹{vendor.statistics.totalEarnings?.toLocaleString() || 0}</p>
+                    <p className="text-sm text-gray-600">Total Earnings</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function AdminVendors() {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -179,6 +446,7 @@ export default function AdminVendors() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [kycFilter, setKycFilter] = useState('all');
   const [kycModal, setKycModal] = useState({ isOpen: false, vendor: null, actionType: null });
+  const [detailModal, setDetailModal] = useState({ isOpen: false, vendor: null });
 
   useEffect(() => {
     fetchVendors();
@@ -196,6 +464,7 @@ export default function AdminVendors() {
       setVendors(response.data.data.vendors || []);
     } catch (error) {
       console.error('Failed to fetch vendors:', error);
+      alert('Failed to fetch vendors');
     } finally {
       setLoading(false);
     }
@@ -208,6 +477,7 @@ export default function AdminVendors() {
       fetchVendors(); // Refresh the list
     } catch (error) {
       console.error('Failed to verify KYC:', error);
+      alert('Failed to verify KYC');
     }
   };
 
@@ -218,6 +488,7 @@ export default function AdminVendors() {
       fetchVendors(); // Refresh the list
     } catch (error) {
       console.error('Failed to reject KYC:', error);
+      alert('Failed to reject KYC');
     }
   };
 
@@ -227,6 +498,17 @@ export default function AdminVendors() {
       fetchVendors(); // Refresh the list
     } catch (error) {
       console.error('Failed to update vendor status:', error);
+      alert('Failed to update vendor status');
+    }
+  };
+
+  const handleViewVendor = async (vendorId) => {
+    try {
+      const response = await getVendorDetails(vendorId);
+      setDetailModal({ isOpen: true, vendor: response.data.data.vendor });
+    } catch (error) {
+      console.error('Failed to fetch vendor details:', error);
+      alert('Failed to fetch vendor details');
     }
   };
 
@@ -306,7 +588,7 @@ export default function AdminVendors() {
               <VendorCard
                 key={vendor._id}
                 vendor={vendor}
-                onView={(id) => console.log('View vendor:', id)}
+                onView={handleViewVendor}
                 onVerify={(id) => setKycModal({ isOpen: true, vendor: vendor, actionType: 'verify' })}
                 onReject={(id) => setKycModal({ isOpen: true, vendor: vendor, actionType: 'reject' })}
                 onStatusChange={handleStatusChange}
@@ -332,6 +614,13 @@ export default function AdminVendors() {
           onClose={() => setKycModal({ isOpen: false, vendor: null, actionType: null })}
           onAction={kycModal.actionType === 'verify' ? handleVerifyKYC : handleRejectKYC}
           actionType={kycModal.actionType}
+        />
+
+        {/* Vendor Detail Modal */}
+        <VendorDetailModal
+          vendor={detailModal.vendor}
+          isOpen={detailModal.isOpen}
+          onClose={() => setDetailModal({ isOpen: false, vendor: null })}
         />
       </div>
     </div>

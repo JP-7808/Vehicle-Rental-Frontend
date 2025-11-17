@@ -71,3 +71,4 @@ export const getAllPromoCodes = (params) => api.get('/admin/promo-codes', { para
 export const createPromoCode = (data) => api.post('/admin/promo-codes', data);
 export const updatePromoCode = (id, data) => api.put(`/admin/promo-codes/${id}`, data);
 export const deletePromoCode = (id) => api.delete(`/admin/promo-codes/${id}`);
+

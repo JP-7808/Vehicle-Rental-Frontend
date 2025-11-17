@@ -1,8 +1,9 @@
-// src/pages/admin/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, Car, Calendar, DollarSign, TrendingUp, AlertCircle,
-  CheckCircle, XCircle, Clock, Eye
+  CheckCircle, XCircle, Clock, Eye, Building, Settings,
+  BarChart3, CreditCard
 } from 'lucide-react';
 import { getAdminDashboard, getEnhancedDashboard } from '../../services/adminApi';
 
@@ -30,19 +31,34 @@ const StatCard = ({ title, value, icon: Icon, change, changeType, onClick }) => 
   </div>
 );
 
-const QuickAction = ({ title, description, icon: Icon, action, color }) => (
-  <div className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow">
-    <div className="flex items-start space-x-4">
-      <div className={`p-3 rounded-full ${color}`}>
-        <Icon className="h-6 w-6 text-white" />
-      </div>
-      <div className="flex-1">
-        <h3 className="font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-600 mt-1">{description}</p>
+const QuickAction = ({ title, description, icon: Icon, action, color, path }) => {
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    if (path) {
+      navigate(path);
+    } else if (action) {
+      action();
+    }
+  };
+
+  return (
+    <div 
+      className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={handleClick}
+    >
+      <div className="flex items-start space-x-4">
+        <div className={`p-3 rounded-full ${color}`}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900">{title}</h3>
+          <p className="text-sm text-gray-600 mt-1">{description}</p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const RecentActivity = ({ activities }) => (
   <div className="bg-white rounded-lg shadow-md p-6">
@@ -73,6 +89,7 @@ export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('week');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();
@@ -89,18 +106,6 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  const stats = dashboardData?.realTimeMetrics || {};
-  const weeklyPerformance = dashboardData?.weeklyPerformance || [];
-  const topCities = dashboardData?.topCities || [];
 
   const quickActions = [
     {
@@ -154,6 +159,18 @@ export default function AdminDashboard() {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  const stats = dashboardData?.realTimeMetrics || {};
+  const weeklyPerformance = dashboardData?.weeklyPerformance || [];
+  const topCities = dashboardData?.topCities || [];
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -190,6 +207,7 @@ export default function AdminDashboard() {
             icon={Users}
             change="+12% from last week"
             changeType="positive"
+            onClick={() => navigate('/admin/users')}
           />
           <StatCard
             title="Active Bookings"
@@ -197,6 +215,7 @@ export default function AdminDashboard() {
             icon={Calendar}
             change="+5% from yesterday"
             changeType="positive"
+            onClick={() => navigate('/admin/bookings')}
           />
           <StatCard
             title="Today's Revenue"
@@ -204,6 +223,7 @@ export default function AdminDashboard() {
             icon={DollarSign}
             change="+8% from yesterday"
             changeType="positive"
+            onClick={() => navigate('/admin/payments')}
           />
           <StatCard
             title="Pending KYC"
@@ -211,6 +231,7 @@ export default function AdminDashboard() {
             icon={AlertCircle}
             change="3 need attention"
             changeType="negative"
+            onClick={() => navigate('/admin/vendors')}
           />
         </div>
 

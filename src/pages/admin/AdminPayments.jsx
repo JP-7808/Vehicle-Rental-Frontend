@@ -1,10 +1,14 @@
-// src/pages/admin/AdminPayments.jsx
 import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, Eye, DollarSign, User, Building, 
-  Calendar, CheckCircle, XCircle, RefreshCw, CreditCard
+  Calendar, CheckCircle, XCircle, RefreshCw, CreditCard,
+  Download, FileText, Shield
 } from 'lucide-react';
-import { getAllPayments, initiateAdminRefund } from '../../services/adminApi';
+import { 
+  getAllPayments, 
+  initiateAdminRefund,
+  getPaymentDetails 
+} from '../../services/adminApi';
 
 const PaymentCard = ({ payment, onView, onRefund }) => {
   const getStatusColor = (status) => {
@@ -31,7 +35,9 @@ const PaymentCard = ({ payment, onView, onRefund }) => {
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900">Payment #{payment.gatewayPaymentId?.slice(-8)}</h3>
+          <h3 className="font-semibold text-gray-900">
+            Payment {payment.gatewayPaymentId ? `#${payment.gatewayPaymentId.slice(-8)}` : `#${payment._id.slice(-8)}`}
+          </h3>
           <p className="text-sm text-gray-600 mt-1">
             {formatDate(payment.createdAt)}
           </p>
@@ -89,6 +95,279 @@ const PaymentCard = ({ payment, onView, onRefund }) => {
               <RefreshCw className="h-4 w-4" />
             </button>
           )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PaymentDetailModal = ({ payment, isOpen, onClose }) => {
+  if (!isOpen || !payment) return null;
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusColor = (status) => {
+    const statusColors = {
+      'success': 'bg-green-100 text-green-800',
+      'failed': 'bg-red-100 text-red-800',
+      'refunded': 'bg-blue-100 text-blue-800',
+      'initiated': 'bg-yellow-100 text-yellow-800'
+    };
+    return statusColors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Payment Details</h2>
+              <p className="text-gray-600">
+                {payment.gatewayPaymentId ? `Gateway ID: ${payment.gatewayPaymentId}` : `ID: ${payment._id}`}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {/* Payment Status */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Payment Status</h3>
+                <p className="text-gray-600">Current status of the payment</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(payment.status)}`}>
+                {payment.status.toUpperCase()}
+              </span>
+            </div>
+
+            {/* Payment Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Amount</label>
+                  <p className="mt-1 text-2xl font-bold text-green-600">₹{payment.amount?.toLocaleString()}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Currency</label>
+                  <p className="mt-1 text-sm text-gray-900">{payment.currency || 'INR'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                  <p className="mt-1 text-sm text-gray-900 capitalize">{payment.paymentMethod || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Gateway</label>
+                  <p className="mt-1 text-sm text-gray-900 capitalize">{payment.gateway || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Created At</label>
+                  <p className="mt-1 text-sm text-gray-900">{formatDate(payment.createdAt)}</p>
+                </div>
+                {payment.paidAt && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Paid At</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatDate(payment.paidAt)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Gateway Information */}
+            {(payment.gatewayPaymentId || payment.gatewayOrderId) && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Gateway Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {payment.gatewayPaymentId && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Gateway Payment ID</label>
+                      <p className="mt-1 text-sm text-gray-900 font-mono">{payment.gatewayPaymentId}</p>
+                    </div>
+                  )}
+                  {payment.gatewayOrderId && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Gateway Order ID</label>
+                      <p className="mt-1 text-sm text-gray-900 font-mono">{payment.gatewayOrderId}</p>
+                    </div>
+                  )}
+                  {payment.gatewaySignature && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Gateway Signature</label>
+                      <p className="mt-1 text-sm text-gray-900 font-mono break-all">{payment.gatewaySignature}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Customer Information */}
+            {payment.user && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Name</label>
+                    <p className="mt-1 text-sm text-gray-900">{payment.user.name}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <p className="mt-1 text-sm text-gray-900">{payment.user.email}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                    <p className="mt-1 text-sm text-gray-900">{payment.user.phone}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">User ID</label>
+                    <p className="mt-1 text-sm text-gray-900 font-mono">{payment.user._id}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Vendor Information */}
+            {payment.vendor && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Vendor Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                    <p className="mt-1 text-sm text-gray-900">{payment.vendor.companyName}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Contact Email</label>
+                    <p className="mt-1 text-sm text-gray-900">{payment.vendor.contactEmail}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Contact Phone</label>
+                    <p className="mt-1 text-sm text-gray-900">{payment.vendor.contactPhone}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Vendor ID</label>
+                    <p className="mt-1 text-sm text-gray-900 font-mono">{payment.vendor._id}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Booking Information */}
+            {payment.booking && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Booking Reference</label>
+                    <p className="mt-1 text-sm text-gray-900">{payment.booking.bookingRef}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Booking ID</label>
+                    <p className="mt-1 text-sm text-gray-900 font-mono">{payment.booking._id}</p>
+                  </div>
+                  {payment.booking.pickup && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Pickup Location</label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {payment.booking.pickup.locationName}, {payment.booking.pickup.city}
+                      </p>
+                    </div>
+                  )}
+                  {payment.booking.vehicle && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Vehicle</label>
+                      <p className="mt-1 text-sm text-gray-900">{payment.booking.vehicle.title}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Refund Information */}
+            {payment.refundDetails && payment.refundDetails.refundedAmount > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Refund Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Refunded Amount</label>
+                    <p className="mt-1 text-sm text-blue-600 font-semibold">
+                      ₹{payment.refundDetails.refundedAmount?.toLocaleString()}
+                    </p>
+                  </div>
+                  {payment.refundDetails.refundAt && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Refunded At</label>
+                      <p className="mt-1 text-sm text-gray-900">{formatDate(payment.refundDetails.refundAt)}</p>
+                    </div>
+                  )}
+                  {payment.refundDetails.refundTransactionId && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Refund Transaction ID</label>
+                      <p className="mt-1 text-sm text-gray-900 font-mono">{payment.refundDetails.refundTransactionId}</p>
+                    </div>
+                  )}
+                  {payment.refundDetails.refundStatus && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Refund Status</label>
+                      <span className={`mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        payment.refundDetails.refundStatus === 'completed' ? 'bg-green-100 text-green-800' :
+                        payment.refundDetails.refundStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {payment.refundDetails.refundStatus.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Additional Metadata */}
+            {payment.meta && Object.keys(payment.meta).length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Metadata</h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <pre className="text-sm text-gray-900 whitespace-pre-wrap">
+                    {JSON.stringify(payment.meta, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Close
+              </button>
+              {payment.gatewayPaymentId && (
+                <button
+                  onClick={() => window.open(`https://dashboard.razorpay.com/payments/${payment.gatewayPaymentId}`, '_blank')}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                >
+                  <Shield className="h-4 w-4" />
+                  <span>View in Razorpay</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -178,6 +457,7 @@ export default function AdminPayments() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('');
   const [refundModal, setRefundModal] = useState({ isOpen: false, payment: null });
+  const [detailModal, setDetailModal] = useState({ isOpen: false, payment: null });
 
   useEffect(() => {
     fetchPayments();
@@ -195,6 +475,7 @@ export default function AdminPayments() {
       setPayments(response.data.data.payments || []);
     } catch (error) {
       console.error('Failed to fetch payments:', error);
+      alert('Failed to fetch payments');
     } finally {
       setLoading(false);
     }
@@ -207,6 +488,17 @@ export default function AdminPayments() {
       fetchPayments(); // Refresh the list
     } catch (error) {
       console.error('Failed to initiate refund:', error);
+      alert('Failed to initiate refund');
+    }
+  };
+
+  const handleViewPayment = async (paymentId) => {
+    try {
+      const response = await getPaymentDetails(paymentId);
+      setDetailModal({ isOpen: true, payment: response.data.data.payment });
+    } catch (error) {
+      console.error('Failed to fetch payment details:', error);
+      alert('Failed to fetch payment details');
     }
   };
 
@@ -284,7 +576,7 @@ export default function AdminPayments() {
               <PaymentCard
                 key={payment._id}
                 payment={payment}
-                onView={(id) => console.log('View payment:', id)}
+                onView={handleViewPayment}
                 onRefund={(id) => setRefundModal({ isOpen: true, payment: payment })}
               />
             ))}
@@ -307,6 +599,13 @@ export default function AdminPayments() {
           isOpen={refundModal.isOpen}
           onClose={() => setRefundModal({ isOpen: false, payment: null })}
           onRefund={handleRefund}
+        />
+
+        {/* Payment Detail Modal */}
+        <PaymentDetailModal
+          payment={detailModal.payment}
+          isOpen={detailModal.isOpen}
+          onClose={() => setDetailModal({ isOpen: false, payment: null })}
         />
       </div>
     </div>

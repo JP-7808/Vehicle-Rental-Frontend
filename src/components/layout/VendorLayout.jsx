@@ -20,8 +20,8 @@ const VendorLayout = ({ children }) => {
     { name: 'My Vehicles', href: '/vendor/vehicles', icon: Car },
     { name: 'Add Vehicle', href: '/vendor/vehicles/add', icon: Plus },
     { name: 'Bookings', href: '/vendor/bookings', icon: Calendar },
-    { name: 'Earnings', href: '/vendor/earnings', icon: DollarSign },
-    { name: 'Analytics', href: '/vendor/analytics', icon: BarChart3 },
+    // { name: 'Earnings', href: '/vendor/earnings', icon: DollarSign },
+    // { name: 'Analytics', href: '/vendor/analytics', icon: BarChart3 },
   ];
 
   const settingsNavigation = [
