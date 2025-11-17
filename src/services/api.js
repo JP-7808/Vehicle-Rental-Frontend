@@ -1,8 +1,8 @@
 // src/services/api.js
 import axios from 'axios';
 
-// const API_BASE_URL = 'https://vehicle-rental-backend-cctz.onrender.com/api' || 'http://localhost:6600/api';
-const API_BASE_URL = 'http://localhost:6600/api';
+const API_BASE_URL = 'https://vehicle-rental-backend-cctz.onrender.com/api' || 'http://localhost:6600/api';
+// const API_BASE_URL = 'http://localhost:6600/api';
 
 // Create axios instance
 const api = axios.create({
