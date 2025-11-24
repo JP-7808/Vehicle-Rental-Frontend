@@ -1,7 +1,7 @@
 // src/pages/customer/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Car, Shield, Star, MapPin } from 'lucide-react';
+import { Search, Car, Shield, Star, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
@@ -14,15 +14,30 @@ const Home = () => {
   });
   const [featuredVehicles, setFeaturedVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalVehicles: 0,
+    limit: 6
+  });
 
   useEffect(() => {
-    fetchFeaturedVehicles();
+    fetchFeaturedVehicles(1);
   }, []);
 
-  const fetchFeaturedVehicles = async () => {
+  const fetchFeaturedVehicles = async (page = 1) => {
     try {
-      const response = await api.get('/vehicles?limit=6&page=1');
-      setFeaturedVehicles(response.data.data.vehicles);
+      setLoading(true);
+      const response = await api.get(`/vehicles?limit=${pagination.limit}&page=${page}`);
+      const { vehicles, totalPages, currentPage, total } = response.data.data;
+      
+      setFeaturedVehicles(vehicles);
+      setPagination(prev => ({
+        ...prev,
+        currentPage,
+        totalPages,
+        totalVehicles: total
+      }));
     } catch (error) {
       console.error('Error fetching featured vehicles:', error);
     } finally {
@@ -47,6 +62,12 @@ const Home = () => {
     window.location.href = `/search?${params.toString()}`;
   };
 
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchFeaturedVehicles(newPage);
+    }
+  };
+
   const features = [
     {
       icon: Car,
@@ -69,6 +90,25 @@ const Home = () => {
       description: 'Available across multiple cities with easy pickup',
     },
   ];
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  };
 
   return (
     <div className="space-y-12">
@@ -192,7 +232,14 @@ const Home = () => {
       {/* Featured Vehicles Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Featured Vehicles</h2>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Featured Vehicles</h2>
+            {!loading && (
+              <p className="text-gray-600 mt-2">
+                Showing {featuredVehicles.length} of {pagination.totalVehicles} vehicles
+              </p>
+            )}
+          </div>
           <Link
             to="/search"
             className="text-primary-600 hover:text-primary-700 font-medium"
@@ -206,52 +253,89 @@ const Home = () => {
             <LoadingSpinner size="lg" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredVehicles.map((vehicle) => (
-              <div key={vehicle._id} className="card overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-                  <img
-                    src={vehicle.images[0] || '/placeholder-vehicle.jpg'}
-                    alt={vehicle.title}
-                    className="w-full h-48 object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {vehicle.title}
-                  </h3>
-                  <div className="flex items-center text-gray-600 mb-2">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span className="text-sm">
-                      {vehicle.locations?.[0]?.city || 'Multiple cities'}
-                    </span>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {featuredVehicles.map((vehicle) => (
+                <div key={vehicle._id} className="card overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+                    <img
+                      src={vehicle.images[0] || '/placeholder-vehicle.jpg'}
+                      alt={vehicle.title}
+                      className="w-full h-48 object-cover"
+                    />
                   </div>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-2xl font-bold text-primary-600">
-                      ₹{vehicle.pricing.baseDaily}/day
-                    </span>
-                    <span className="text-sm text-gray-500 capitalize">
-                      {vehicle.vehicleType}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-600">
-                        {vehicle.vendor?.rating || 'New'}
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {vehicle.title}
+                    </h3>
+                    <div className="flex items-center text-gray-600 mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span className="text-sm">
+                        {vehicle.locations?.[0]?.city || 'Multiple cities'}
                       </span>
                     </div>
-                    <Link
-                      to={`/vehicles/${vehicle._id}`}
-                      className="btn-primary text-sm"
-                    >
-                      View Details
-                    </Link>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-2xl font-bold text-primary-600">
+                        ₹{vehicle.pricing.baseDaily}/day
+                      </span>
+                      <span className="text-sm text-gray-500 capitalize">
+                        {vehicle.vehicleType}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                        <span className="text-sm text-gray-600">
+                          {vehicle.vendor?.rating || 'New'}
+                        </span>
+                      </div>
+                      <Link
+                        to={`/vehicles/${vehicle._id}`}
+                        className="btn-primary text-sm"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1}
+                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+
+                {getPageNumbers().map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      pagination.currentPage === pageNum
+                        ? 'bg-primary-600 text-white'
+                        : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
         {!loading && featuredVehicles.length === 0 && (

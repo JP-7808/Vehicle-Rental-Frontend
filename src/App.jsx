@@ -33,6 +33,7 @@ import VendorProfile from './pages/vendor/VendorProfile';
 import AddVehicle from './pages/vendor/AddVehicle';
 import EditVehicle from './pages/vendor/EditVehicle';
 import VendorSettings from './pages/vendor/VendorSettings';
+import VendorBookingDetails from './pages/vendor/VendorBookingDetails';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -208,6 +209,13 @@ function App() {
             <ProtectedRoute requiredRole="vendor">
               <Layout>
                 <VendorSettings />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/vendor/bookings/:id" element={
+            <ProtectedRoute requiredRole="vendor">
+              <Layout>
+                <VendorBookingDetails />
               </Layout>
             </ProtectedRoute>
           } />

@@ -1,7 +1,7 @@
 // src/pages/customer/VehicleSearch.jsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search, Filter, MapPin, Star, Car, Bike, Truck, Bus } from 'lucide-react';
+import { Search, Filter, MapPin, Star, Car, Bike, Truck, Bus, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
@@ -14,15 +14,15 @@ const VehicleSearch = () => {
     startDate: searchParams.get('startDate') || '',
     endDate: searchParams.get('endDate') || '',
     vehicleType: searchParams.get('vehicleType') || '',
-    minPrice: '',
-    maxPrice: '',
-    transmission: '',
-    fuelType: '',
-    seats: '',
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    transmission: searchParams.get('transmission') || '',
+    fuelType: searchParams.get('fuelType') || '',
+    seats: searchParams.get('seats') || '',
   });
   const [showFilters, setShowFilters] = useState(false);
   const [pagination, setPagination] = useState({
-    page: 1,
+    page: parseInt(searchParams.get('page')) || 1,
     limit: 12,
     total: 0,
     pages: 0,
@@ -31,7 +31,7 @@ const VehicleSearch = () => {
   const vehicleTypes = [
     { value: 'car', label: 'Car', icon: Car },
     { value: 'bike', label: 'Bike', icon: Bike },
-    { value: 'bicycle', label: 'Bicycle', icon: Bike }, // Using Bike icon for bicycle
+    { value: 'bicycle', label: 'Bicycle', icon: Bike },
     { value: 'bus', label: 'Bus', icon: Bus },
     { value: 'truck', label: 'Truck', icon: Truck },
   ];
@@ -49,14 +49,14 @@ const VehicleSearch = () => {
 
   useEffect(() => {
     fetchVehicles();
-  }, [searchParams, pagination.page]);
+  }, [pagination.page, searchParams]);
 
   const fetchVehicles = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       
-      // Add search params
+      // Add all filters to params
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.append(key, value);
       });
@@ -71,11 +71,18 @@ const VehicleSearch = () => {
       setVehicles(vehicles);
       setPagination(prev => ({
         ...prev,
-        total: paginationData.total,
-        pages: paginationData.pages,
+        total: paginationData.total || 0,
+        pages: paginationData.pages || 0,
+        page: paginationData.currentPage || 1,
       }));
     } catch (error) {
       console.error('Error fetching vehicles:', error);
+      // Set default values on error
+      setPagination(prev => ({
+        ...prev,
+        total: 0,
+        pages: 0,
+      }));
     } finally {
       setLoading(false);
     }
@@ -90,16 +97,16 @@ const VehicleSearch = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setPagination(prev => ({ ...prev, page: 1 }));
+    const newPage = 1;
+    setPagination(prev => ({ ...prev, page: newPage }));
     
-    // Update URL search params
+    // Update URL search params with all filters and page
     const newSearchParams = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value) newSearchParams.append(key, value);
     });
+    newSearchParams.append('page', newPage.toString());
     setSearchParams(newSearchParams);
-    
-    fetchVehicles();
   };
 
   const clearFilters = () => {
@@ -115,20 +122,90 @@ const VehicleSearch = () => {
       seats: '',
     };
     setFilters(clearedFilters);
-    setSearchParams(new URLSearchParams());
     setPagination(prev => ({ ...prev, page: 1 }));
+    setSearchParams(new URLSearchParams());
   };
 
   const handlePageChange = (newPage) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (newPage >= 1 && newPage <= pagination.pages) {
+      setPagination(prev => ({ ...prev, page: newPage }));
+      
+      // Update URL with new page
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set('page', newPage.toString());
+      setSearchParams(newSearchParams);
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
+
+  // Calculate display range safely
+  const getDisplayRange = () => {
+    const start = ((pagination.page - 1) * pagination.limit) + 1;
+    const end = Math.min(pagination.page * pagination.limit, pagination.total);
+    return { start, end };
+  };
+
+  // Generate page numbers for pagination with ellipsis
+  const getPageNumbers = () => {
+    const pages = [];
+    const currentPage = pagination.page;
+    const totalPages = pagination.pages;
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total pages are less than max visible
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      // Calculate start and end of middle pages
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      // Adjust if we're at the beginning
+      if (currentPage <= 3) {
+        endPage = 4;
+      }
+      // Adjust if we're at the end
+      else if (currentPage >= totalPages - 2) {
+        startPage = totalPages - 3;
+      }
+
+      // Add ellipsis after first page if needed
+      if (startPage > 2) {
+        pages.push('...');
+      }
+
+      // Add middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+
+      // Add ellipsis before last page if needed
+      if (endPage < totalPages - 1) {
+        pages.push('...');
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
+  const { start, end } = getDisplayRange();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Filters Sidebar */}
-        <div className="lg:w-1/4">
+        <div className={`lg:w-1/4 ${showFilters ? 'block' : 'hidden lg:block'}`}>
           <div className="card p-6 sticky top-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
@@ -291,9 +368,9 @@ const VehicleSearch = () => {
               <h1 className="text-2xl font-bold text-gray-900">
                 Available Vehicles
               </h1>
-              {!loading && (
+              {!loading && pagination.total > 0 && (
                 <p className="text-gray-600 mt-1">
-                  {pagination.total} vehicles found
+                  Showing {start} - {end} of {pagination.total} vehicles
                 </p>
               )}
             </div>
@@ -303,7 +380,7 @@ const VehicleSearch = () => {
               className="lg:hidden btn-secondary flex items-center space-x-2"
             >
               <Filter className="h-4 w-4" />
-              <span>Filters</span>
+              <span>{showFilters ? 'Hide' : 'Show'} Filters</span>
             </button>
           </div>
 
@@ -339,38 +416,56 @@ const VehicleSearch = () => {
                 </div>
               )}
 
-              {/* Pagination */}
+              {/* Enhanced Pagination */}
               {pagination.pages > 1 && (
-                <div className="flex justify-center items-center space-x-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
+                <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+                  <div className="text-sm text-gray-700">
+                    Page {pagination.page} of {pagination.pages}
+                  </div>
                   
-                  {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
+                  <div className="flex items-center space-x-1">
+                    {/* Previous Button */}
                     <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-2 border rounded-md text-sm font-medium ${
-                        page === pagination.page
-                          ? 'bg-primary-600 text-white border-primary-600'
-                          : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
-                      }`}
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page === 1}
+                      className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Previous page"
                     >
-                      {page}
+                      <ChevronLeft className="h-4 w-4" />
                     </button>
-                  ))}
-                  
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page === pagination.pages}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
+
+                    {/* Page Numbers */}
+                    {getPageNumbers().map((pageNum, index) => (
+                      <button
+                        key={index}
+                        onClick={() => typeof pageNum === 'number' && handlePageChange(pageNum)}
+                        disabled={pageNum === '...'}
+                        className={`min-w-[40px] px-3 py-2 rounded-lg font-medium transition-colors ${
+                          pageNum === pagination.page
+                            ? 'bg-primary-600 text-white border-primary-600'
+                            : pageNum === '...'
+                            ? 'text-gray-500 cursor-default'
+                            : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page === pagination.pages}
+                      className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Next page"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="text-sm text-gray-500">
+                    {pagination.total} total vehicles
+                  </div>
                 </div>
               )}
             </>
@@ -392,7 +487,6 @@ const VehicleCard = ({ vehicle }) => {
 
   return (
     <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      {/* Make the entire image area clickable */}
       <Link to={`/vehicles/${vehicle._id}`}>
         <div className="aspect-w-16 aspect-h-9 bg-gray-200 relative cursor-pointer">
           <img
@@ -450,7 +544,6 @@ const VehicleCard = ({ vehicle }) => {
           </div>
         </div>
 
-        {/* Add a dedicated View Details button */}
         <Link 
           to={`/vehicles/${vehicle._id}`}
           className="w-full mt-3 btn-primary text-center block py-2 text-sm"

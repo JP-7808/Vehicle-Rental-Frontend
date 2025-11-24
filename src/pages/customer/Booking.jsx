@@ -174,92 +174,87 @@ const Booking = () => {
 
                   {/* Pickup Information */}
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                      Pickup Information
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                      <MapPin className="h-5 w-5 mr-2 text-primary-600" />
+                      Pickup Location
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          City
-                        </label>
-                        <input
-                          type="text"
-                          value={bookingData.pickup.city}
-                          onChange={(e) => handleInputChange('pickup', 'city', e.target.value)}
-                          className="input-field"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Location Name
-                        </label>
-                        <input
-                          type="text"
-                          value={bookingData.pickup.locationName}
-                          onChange={(e) => handleInputChange('pickup', 'locationName', e.target.value)}
-                          className="input-field"
-                          placeholder="e.g., Airport, Downtown"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Date & Time
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={bookingData.pickup.datetime}
-                          onChange={(e) => handleInputChange('pickup', 'datetime', e.target.value)}
-                          className="input-field"
-                          required
-                        />
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">
+                            City
+                          </label>
+                          <p className="text-base font-semibold text-gray-900">
+                            {bookingData.pickup.city || vehicle.locations?.[0]?.city}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">
+                            Location
+                          </label>
+                          <p className="text-base font-semibold text-gray-900">
+                            {bookingData.pickup.locationName || vehicle.locations?.[0]?.locationName || 'Vendor Location'}
+                          </p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-600 mb-1">
+                            Pickup Date & Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={bookingData.pickup.datetime.slice(0, 16)}
+                            onChange={(e) => handleInputChange('pickup', 'datetime', e.target.value)}
+                            className="input-field w-full"
+                            required
+                            min={new Date().toISOString().slice(0, 16)}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Dropoff Information */}
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                      Dropoff Information
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                      <MapPin className="h-5 w-5 mr-2 text-red-600" />
+                      Dropoff Location
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          City
-                        </label>
-                        <input
-                          type="text"
-                          value={bookingData.dropoff.city}
-                          onChange={(e) => handleInputChange('dropoff', 'city', e.target.value)}
-                          className="input-field"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Location Name
-                        </label>
-                        <input
-                          type="text"
-                          value={bookingData.dropoff.locationName}
-                          onChange={(e) => handleInputChange('dropoff', 'locationName', e.target.value)}
-                          className="input-field"
-                          placeholder="e.g., Airport, Downtown"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Date & Time
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={bookingData.dropoff.datetime}
-                          onChange={(e) => handleInputChange('dropoff', 'datetime', e.target.value)}
-                          className="input-field"
-                          required
-                        />
+                    <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">
+                            City
+                          </label>
+                          <p className="text-base font-semibold text-gray-900">
+                            {bookingData.dropoff.city || vehicle.locations?.[0]?.city}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">
+                            Location
+                          </label>
+                          <p className="text-base font-semibold text-gray-900">
+                            {bookingData.dropoff.locationName || vehicle.locations?.[0]?.locationName || 'Same as Pickup'}
+                          </p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-600 mb-1">
+                            Dropoff Date & Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={bookingData.dropoff.datetime.slice(0, 16)}
+                            onChange={(e) => handleInputChange('dropoff', 'datetime', e.target.value)}
+                            className="input-field w-full"
+                            required
+                            min={bookingData.pickup.datetime.slice(0, 16)}
+                          />
+                        </div>
                       </div>
                     </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Dropoff must be at the same location as pickup
+                    </p>
                   </div>
 
                   {/* Booking Type */}
@@ -284,7 +279,7 @@ const Booking = () => {
                         </p>
                       </button>
                       
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => setBookingData(prev => ({ ...prev, bookingType: 'with-driver' }))}
                         className={`p-4 border-2 rounded-lg text-left ${
@@ -298,7 +293,7 @@ const Booking = () => {
                         <p className="text-sm text-gray-600 mt-1">
                           Professional driver included
                         </p>
-                      </button>
+                      </button> */}
                     </div>
                   </div>
 
