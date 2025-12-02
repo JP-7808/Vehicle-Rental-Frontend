@@ -137,7 +137,7 @@ const Home = () => {
                       value={searchParams.city}
                       onChange={handleSearchChange}
                       placeholder="Enter city"
-                      className="input-field"
+                      className="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                     />
                   </div>
                   
@@ -150,7 +150,7 @@ const Home = () => {
                       name="startDate"
                       value={searchParams.startDate}
                       onChange={handleSearchChange}
-                      className="input-field"
+                      className="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                     />
                   </div>
                   
@@ -163,7 +163,7 @@ const Home = () => {
                       name="endDate"
                       value={searchParams.endDate}
                       onChange={handleSearchChange}
-                      className="input-field"
+                      className="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                     />
                   </div>
                   
@@ -175,7 +175,7 @@ const Home = () => {
                       name="vehicleType"
                       value={searchParams.vehicleType}
                       onChange={handleSearchChange}
-                      className="input-field"
+                      className="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white"
                     >
                       <option value="">All Types</option>
                       <option value="car">Car</option>
