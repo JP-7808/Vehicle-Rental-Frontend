@@ -240,18 +240,18 @@ const PublicLayout = ({ children }) => {
               <div className="space-y-2 text-gray-400">
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4" />
-                  <span>+1 (555) 123-4567</span>
+                  <span>+91 7526051009</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span>support@driveease.com</span>
+                  <span>support@asiaandcompanyselfdrive.com</span>
                 </div>
               </div>
             </div>
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 DriveEase. All rights reserved.</p>
+            <p>&copy; 2025 Asiaandcompanyselfdrive. All rights reserved.</p>
           </div>
         </div>
       </footer>
