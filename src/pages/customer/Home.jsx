@@ -1,7 +1,15 @@
 // src/pages/customer/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Car, Shield, Star, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Search,
+  Car,
+  Shield,
+  Star,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
@@ -12,31 +20,67 @@ const Home = () => {
     endDate: '',
     vehicleType: '',
   });
+
+  // City autocomplete states
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [cityLoading, setCityLoading] = useState(false);
+
   const [featuredVehicles, setFeaturedVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     totalVehicles: 0,
-    limit: 6
+    limit: 6,
   });
 
   useEffect(() => {
     fetchFeaturedVehicles(1);
   }, []);
 
+  // Debounced city suggestions fetch
+  useEffect(() => {
+    const fetchCitySuggestions = async () => {
+      const query = searchParams.city.trim();
+      if (!query) {
+        setCitySuggestions([]);
+        setShowCitySuggestions(false);
+        return;
+      }
+
+      try {
+        setCityLoading(true);
+        // Adjust this endpoint if your backend uses a different path
+        const response = await api.get(`/vehicles/cities?q=${encodeURIComponent(query)}`);
+        const cities = response.data.data || []; // Adjust based on your API response
+        setCitySuggestions(cities);
+        setShowCitySuggestions(true);
+      } catch (error) {
+        console.error('Error fetching city suggestions:', error);
+        setCitySuggestions([]);
+      } finally {
+        setCityLoading(false);
+      }
+    };
+
+    const timer = setTimeout(fetchCitySuggestions, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchParams.city]);
+
   const fetchFeaturedVehicles = async (page = 1) => {
     try {
       setLoading(true);
       const response = await api.get(`/vehicles?limit=${pagination.limit}&page=${page}`);
       const { vehicles, totalPages, currentPage, total } = response.data.data;
-      
+
       setFeaturedVehicles(vehicles);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
         currentPage,
         totalPages,
-        totalVehicles: total
+        totalVehicles: total,
       }));
     } catch (error) {
       console.error('Error fetching featured vehicles:', error);
@@ -46,15 +90,20 @@ const Home = () => {
   };
 
   const handleSearchChange = (e) => {
-    setSearchParams({
-      ...searchParams,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setSearchParams((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCitySelect = (city) => {
+    setSearchParams((prev) => ({ ...prev, city }));
+    setShowCitySuggestions(false);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Navigate to search page with params
     const params = new URLSearchParams();
     Object.entries(searchParams).forEach(([key, value]) => {
       if (value) params.append(key, value);
@@ -65,6 +114,7 @@ const Home = () => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       fetchFeaturedVehicles(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -91,22 +141,20 @@ const Home = () => {
     },
   ];
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
-    
-    // Adjust start page if we're near the end
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   };
 
@@ -122,12 +170,13 @@ const Home = () => {
             <p className="text-xl md:text-2xl mb-8 text-primary-100">
               Rent vehicles across multiple cities with ease
             </p>
-            
+
             {/* Search Form */}
             <form onSubmit={handleSearchSubmit} className="max-w-4xl mx-auto">
               <div className="bg-white rounded-lg shadow-lg p-4 md:p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div>
+                  {/* City Input with Autocomplete */}
+                  <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       City
                     </label>
@@ -136,11 +185,38 @@ const Home = () => {
                       name="city"
                       value={searchParams.city}
                       onChange={handleSearchChange}
-                      placeholder="Enter city"
+                      placeholder="Enter city (e.g. Delhi, Mumbai)"
                       className="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                      autoComplete="off"
                     />
+
+                    {/* City Suggestions Dropdown */}
+                    {showCitySuggestions && (
+                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                        {cityLoading ? (
+                          <div className="px-4 py-3 text-center text-gray-500">
+                            <LoadingSpinner size="sm" />
+                          </div>
+                        ) : citySuggestions.length > 0 ? (
+                          citySuggestions.map((city, index) => (
+                            <div
+                              key={index}
+                              onMouseDown={() => handleCitySelect(city)} // mousedown to prevent blur conflict
+                              className="px-4 py-3 hover:bg-primary-50 cursor-pointer flex items-center"
+                            >
+                              <MapPin className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                              <span className="text-gray-800 truncate">{city}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-center text-gray-500">
+                            No cities found
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Start Date
@@ -153,7 +229,7 @@ const Home = () => {
                       className="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       End Date
@@ -166,7 +242,7 @@ const Home = () => {
                       className="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Vehicle Type
@@ -186,7 +262,7 @@ const Home = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="mt-4">
                   <button
                     type="submit"
@@ -209,7 +285,7 @@ const Home = () => {
             Why Choose RentWheels?
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            We provide the best vehicle rental experience with secure payments, 
+            We provide the best vehicle rental experience with secure payments,
             verified vendors, and 24/7 customer support.
           </p>
         </div>
@@ -240,10 +316,7 @@ const Home = () => {
               </p>
             )}
           </div>
-          <Link
-            to="/search"
-            className="text-primary-600 hover:text-primary-700 font-medium"
-          >
+          <Link to="/search" className="text-primary-600 hover:text-primary-700 font-medium">
             View All →
           </Link>
         </div>
@@ -256,7 +329,10 @@ const Home = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {featuredVehicles.map((vehicle) => (
-                <div key={vehicle._id} className="card overflow-hidden hover:shadow-lg transition-shadow">
+                <div
+                  key={vehicle._id}
+                  className="card overflow-hidden hover:shadow-lg transition-shadow"
+                >
                   <div className="aspect-w-16 aspect-h-9 bg-gray-200">
                     <img
                       src={vehicle.images[0] || '/placeholder-vehicle.jpg'}
@@ -303,7 +379,7 @@ const Home = () => {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-2">
+              <div className="flex justify-center items-center space-x-2 mt-8">
                 <button
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={pagination.currentPage === 1}
