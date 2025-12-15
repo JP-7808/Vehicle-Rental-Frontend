@@ -20,7 +20,7 @@ const AdminLayout = ({ children }) => {
     { name: 'Vehicles', href: '/admin/vehicles', icon: Car },
     { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
     { name: 'Payments', href: '/admin/payments', icon: CreditCard },
-    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+    // { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
