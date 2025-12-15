@@ -42,7 +42,7 @@ const PublicLayout = ({ children }) => {
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
                 <Car className="h-8 w-8 text-blue-600" />
-                <span className="text-xl font-bold text-gray-900">DriveEase</span>
+                <span className="text-xl font-bold text-gray-900">AsiaAndCompanySelfDrive</span>
               </Link>
             </div>
 

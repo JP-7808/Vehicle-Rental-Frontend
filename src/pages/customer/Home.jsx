@@ -464,9 +464,9 @@ const Home = () => {
                       >
                         <option value="" className="bg-gray-900 text-white">All Types</option>
                         <option value="car" className="bg-gray-900 text-white">🚗 Cars</option>
-                        <option value="bike" className="bg-gray-900 text-white">🏍️ Bikes</option>
+                        {/* <option value="bike" className="bg-gray-900 text-white">🏍️ Bikes</option>
                         <option value="bus" className="bg-gray-900 text-white">🚌 Buses</option>
-                        <option value="truck" className="bg-gray-900 text-white">🚛 Trucks</option>
+                        <option value="truck" className="bg-gray-900 text-white">🚛 Trucks</option> */}
                       </select>
                     </div>
 
