@@ -276,24 +276,27 @@ const VehicleDetails = () => {
                 <h3 className="font-semibold text-gray-900">
                   {vehicle.vendor?.companyName}
                 </h3>
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <div className="flex items-center space-x-1">
+                <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                  {/* Rating */}
+                  <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 text-yellow-400 fill-current" />
                     <span>{vehicle.vendor?.rating || 'New'}</span>
-                    <span>({vehicle.vendor?.ratingCount || 0} reviews)</span>
+                    <span className="text-gray-500">({vehicle.vendor?.ratingCount || 0} reviews)</span>
                   </div>
-                  
+
+                  {/* Phone */}
                   {vehicle.vendor?.contactPhone && (
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-1">
                       <Phone className="h-4 w-4" />
                       <span>{vehicle.vendor.contactPhone}</span>
                     </div>
                   )}
-                  
+
+                  {/* Email - will wrap to next line on small screens */}
                   {vehicle.vendor?.contactEmail && (
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-1">
                       <Mail className="h-4 w-4" />
-                      <span>{vehicle.vendor.contactEmail}</span>
+                      <span className="break-all">{vehicle.vendor.contactEmail}</span>
                     </div>
                   )}
                 </div>
