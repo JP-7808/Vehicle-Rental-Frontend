@@ -50,9 +50,9 @@ const VehicleSearch = () => {
   const vehicleTypes = [
     { value: 'car', label: 'Car', icon: Car },
     { value: 'bike', label: 'Bike', icon: Bike },
-    { value: 'bicycle', label: 'Bicycle', icon: Bike },
-    { value: 'bus', label: 'Bus', icon: Bus },
-    { value: 'truck', label: 'Truck', icon: Truck },
+    // { value: 'bicycle', label: 'Bicycle', icon: Bike },
+    // { value: 'bus', label: 'Bus', icon: Bus },
+    // { value: 'truck', label: 'Truck', icon: Truck },
   ];
 
   const transmissions = [

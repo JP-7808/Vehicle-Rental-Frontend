@@ -256,9 +256,9 @@ const Home = () => {
                       <option value="">All Types</option>
                       <option value="car">Car</option>
                       <option value="bike">Bike</option>
-                      <option value="bicycle">Bicycle</option>
+                      {/* <option value="bicycle">Bicycle</option>
                       <option value="bus">Bus</option>
-                      <option value="truck">Truck</option>
+                      <option value="truck">Truck</option> */}
                     </select>
                   </div>
                 </div>
