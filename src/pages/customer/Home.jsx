@@ -369,12 +369,13 @@ const Home = () => {
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Find Your Perfect
-                <span className="block text-primary-200">Ride in Minutes</span>
+                Get Your Car On
+                <span className="block text-primary-200">Your Fingure Tips</span>
+                <span className="block text-primary-200">Book. Drive. Repeat</span>
               </h1>
               
               <p className="text-lg md:text-xl mb-8 text-primary-100 max-w-2xl leading-relaxed">
-                Explore thousands of vehicles across India with flexible booking options and premium customer service
+                👉Explore thousands of vehicles across India with flexible booking options and premium customer service
               </p>
 
               {/* Quick Stats - Using fallback data */}
