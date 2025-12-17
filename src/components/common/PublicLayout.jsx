@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
+import Logo from '../../assets/logo.svg';
+
 const PublicLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
@@ -40,9 +42,13 @@ const PublicLayout = ({ children }) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                <Car className="h-8 w-8 text-blue-600" />
-                <span className="text-xl font-bold text-gray-900">AsiaAndCompanySelfDrive</span>
+              <Link to="/" className="flex items-center space-x-3">  {/* Increased space-x for better spacing */}
+                <img 
+                  src={Logo} 
+                  alt="AsiaAndCompanySelfDrive Logo" 
+                  className="h-10 w-10 object-contain"  // Adjust size as needed (h-10 w-10 is slightly larger than before)
+                />
+                <span className="text-xl font-bold text-gray-900">Asia & Company Self Drive</span>
               </Link>
             </div>
 
@@ -127,8 +133,12 @@ const PublicLayout = ({ children }) => {
           {/* Sidebar */}
           <div className="fixed inset-y-0 right-0 w-64 bg-white shadow-xl">
             <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center space-x-2">
-                <Car className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center space-x-3">
+                <img 
+                  src={Logo} 
+                  alt="AsiaAndCompany Logo" 
+                  className="h-8 w-8 object-contain" 
+                />
                 <span className="text-lg font-bold text-gray-900">AsiaAndCompany</span>
               </div>
               <button
@@ -216,8 +226,12 @@ const PublicLayout = ({ children }) => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
-                <Car className="h-8 w-8 text-blue-400" />
-                <span className="text-2xl font-bold">DriveEase</span>
+                <img 
+                  src={Logo} 
+                  alt="DriveEase Logo" 
+                  className="h-10 w-10 object-contain text-blue-400" 
+                />
+                <span className="text-2xl font-bold">Asia & Company</span>
               </div>
               <p className="text-gray-400 max-w-md">
                 Your trusted partner for vehicle rentals. Find the perfect vehicle for your journey with our wide selection and excellent service.
