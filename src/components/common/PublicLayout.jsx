@@ -139,7 +139,7 @@ const PublicLayout = ({ children }) => {
                   alt="AsiaAndCompany Logo" 
                   className="h-8 w-8 object-contain" 
                 />
-                <span className="text-lg font-bold text-gray-900">AsiaAndCompany</span>
+                <span className="text-lg font-bold text-gray-900">Asia & Company</span>
               </div>
               <button
                 onClick={() => setSidebarOpen(false)}
