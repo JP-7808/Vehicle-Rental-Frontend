@@ -17,6 +17,11 @@ import ResetPassword from './pages/auth/ResetPassword';
 import Home from './pages/customer/Home';
 import VehicleSearch from './pages/customer/VehicleSearch';
 import VehicleDetails from './pages/customer/VehicleDetails';
+import AboutUsPage from './components/legal/AboutUsPage';
+import PrivacyPolicyPage from './components/legal/PrivacyPolicy';
+import TermsConditionsPage from './components/legal/TermsConditionsPage';
+import CancellationPolicyPage from './components/legal/CancellationPolicyPage';
+
 
 // Customer Pages (Login required)
 import Booking from './pages/customer/Booking';
@@ -124,6 +129,26 @@ function App() {
               </PublicLayout>
             </MixedRoute>
           } />
+          <Route path="/legal/about-us" element={
+  <PublicLayout>
+    <AboutUsPage />
+  </PublicLayout>
+} />
+<Route path="/legal/privacy-policy" element={
+  <PublicLayout>
+    <PrivacyPolicyPage />
+  </PublicLayout>
+} />
+<Route path="/legal/terms-conditions" element={
+  <PublicLayout>
+    <TermsConditionsPage />
+  </PublicLayout>
+} />
+<Route path="/legal/cancellation-policy" element={
+  <PublicLayout>
+    <CancellationPolicyPage />
+  </PublicLayout>
+} />
           
           {/* Protected Customer Routes (Login required) */}
           <Route path="/bookings/:id" element={

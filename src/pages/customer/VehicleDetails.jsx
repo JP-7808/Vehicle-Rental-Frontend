@@ -17,6 +17,8 @@ import {
 import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import Alert from '../../components/ui/Alert';
+import LegalPolicies from '../../components/legal/LegalPolicies';
+import TermsConditions from '../../components/legal/TermsConditions';
 
 const VehicleDetails = () => {
   const { id } = useParams();
@@ -303,6 +305,8 @@ const VehicleDetails = () => {
               </div>
             </div>
           </div>
+          <TermsConditions/>
+          
         </div>
 
         {/* Right Column - Booking Widget */}

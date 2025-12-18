@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Car, Menu, X, User, LogOut, Calendar, 
-  Search, Home, Phone, Mail, LogIn, UserPlus
+  Search, Home, Phone, Mail, LogIn, UserPlus,
+  Shield, FileText, Info, BookOpen, AlertCircle,MapPin
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -223,49 +224,174 @@ const PublicLayout = ({ children }) => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+            {/* Company Info */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center space-x-3 mb-4">
                 <img 
                   src={Logo} 
-                  alt="DriveEase Logo" 
-                  className="h-10 w-10 object-contain text-blue-400" 
+                  alt="AsiaAndCompanySelfDrive Logo" 
+                  className="h-12 w-12 object-contain" 
                 />
-                <span className="text-2xl font-bold">Asia & Company</span>
+                <div>
+                  <span className="text-2xl font-bold block">Asia & Company</span>
+                  <span className="text-lg text-blue-300">Self Drive</span>
+                </div>
               </div>
-              <p className="text-gray-400 max-w-md">
-                Your trusted partner for vehicle rentals. Find the perfect vehicle for your journey with our wide selection and excellent service.
+              <p className="text-gray-400 max-w-md mb-4 leading-relaxed">
+                Your trusted partner for self-drive vehicle rentals across India. 
+                Experience complete freedom, comfort, and control over your travel.
               </p>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <div className="flex items-center space-x-2">
+                  {/* <Phone className="h-4 w-4 text-blue-300" /> */}
+                  <span className="text-gray-300">+91 75260 51009</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Mail className="h-4 w-4 text-blue-300" />
+                  <span className="text-gray-300">support@asiaandcompanyselfdrive.com</span>
+                </div>
+              </div>
             </div>
             
+            {/* Quick Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
-                <li><Link to="/search" className="hover:text-white transition-colors">Search Vehicles</Link></li>
+              <h3 className="text-lg font-semibold mb-4 text-white flex items-center">
+                <Home className="h-5 w-5 mr-2 text-blue-300" />
+                Quick Links
+              </h3>
+              <ul className="space-y-3 text-gray-400">
+                <li>
+                  <Link to="/" className="hover:text-white transition-colors flex items-center" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                    <Home className="h-4 w-4 mr-2" />
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/search" className="hover:text-white transition-colors flex items-center" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                    <Search className="h-4 w-4 mr-2" />
+                    Search Vehicles
+                  </Link>
+                </li>
                 {user && (
-                  <li><Link to="/my-bookings" className="hover:text-white transition-colors">My Bookings</Link></li>
+                  <li>
+                    <Link to="/my-bookings" className="hover:text-white transition-colors flex items-center" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                      <Calendar className="h-4 w-4 mr-2" />
+                      My Bookings
+                    </Link>
+                  </li>
                 )}
               </ul>
             </div>
             
+            {/* Legal Policies */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-              <div className="space-y-2 text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4" />
-                  <span>+91 7526051009</span>
+              <h3 className="text-lg font-semibold mb-4 text-white flex items-center">
+                <FileText className="h-5 w-5 mr-2 text-blue-300" />
+                Legal
+              </h3>
+              <ul className="space-y-3 text-gray-400">
+                <li>
+                  <Link 
+                    to="/legal/about-us" 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="hover:text-white transition-colors flex items-center group"
+                  >
+                    <div className="w-1 h-4 bg-transparent group-hover:bg-blue-400 mr-3 rounded"></div>
+                    <Info className="h-4 w-4 mr-2" />
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/legal/privacy-policy" 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="hover:text-white transition-colors flex items-center group"
+                  >
+                    <div className="w-1 h-4 bg-transparent group-hover:bg-blue-400 mr-3 rounded"></div>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/legal/terms-conditions" 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="hover:text-white transition-colors flex items-center group"
+                  >
+                    <div className="w-1 h-4 bg-transparent group-hover:bg-blue-400 mr-3 rounded"></div>
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Terms & Conditions
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/legal/cancellation-policy" 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="hover:text-white transition-colors flex items-center group"
+                  >
+                    <div className="w-1 h-4 bg-transparent group-hover:bg-blue-400 mr-3 rounded"></div>
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Cancellation Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            
+            {/* Contact & Business */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-white flex items-center">
+                <Phone className="h-5 w-5 mr-2 text-blue-300" />
+                Business Hours
+              </h3>
+              <div className="space-y-3 text-gray-400">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mr-3 mt-1">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">Monday – Sunday</p>
+                    <p className="text-sm">9:00 AM – 7:00 PM</p>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4" />
-                  <span>support@asiaandcompanyselfdrive.com</span>
+                <div className="pt-3 border-t border-gray-800">
+                  <div className="flex items-start">
+                    <MapPin className="h-4 w-4 text-blue-300 mr-2 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="text-white font-medium mb-1">Address</p>
+                      <p className="text-sm text-gray-400 leading-tight">
+                        665 Sevai Barauna, Near Sector 14, Vrindavan Yojna, Lucknow, Uttar Pradesh, India
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Asiaandcompanyselfdrive. All rights reserved.</p>
+          {/* Bottom Footer */}
+          <div className="border-t border-gray-800 mt-8 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <div className="text-gray-400 text-sm">
+                <p>&copy; {new Date().getFullYear()} Asia and Company Self Drive. All rights reserved.</p>
+                <p className="mt-1 text-xs">Reg: Lucknow, Uttar Pradesh, India</p>
+              </div>
+              
+              <div className="flex items-center space-x-6">
+                {/* Razorpay Verification Badge */}
+                <div className="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-lg">
+                  <Shield className="h-4 w-4 text-green-400" />
+                  <span className="text-sm text-gray-300">
+                    Payments secured by <span className="text-white font-medium">Razorpay</span>
+                  </span>
+                </div>
+                
+                {/* Policy Update Note */}
+                <div className="text-xs text-gray-500 max-w-xs">
+                  <p className="italic">Note: We reserve the right to update policies without prior notice.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
