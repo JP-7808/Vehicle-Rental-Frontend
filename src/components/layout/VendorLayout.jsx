@@ -67,7 +67,7 @@ const VendorLayout = ({ children }) => {
                 <Building className="h-8 w-8 text-green-600" />
                 <div>
                   <span className="text-xl font-bold text-gray-900">Vendor Panel</span>
-                  <p className="text-xs text-gray-500">DriveEase Partner</p>
+                  <p className="text-xs text-gray-500">Asia & Comapany Self Drive</p>
                 </div>
               </Link>
             </div>
@@ -172,7 +172,7 @@ const VendorLayout = ({ children }) => {
                 <Building className="h-6 w-6 text-green-600" />
                 <div>
                   <span className="text-lg font-bold text-gray-900">Vendor Panel</span>
-                  <p className="text-xs text-gray-500">DriveEase Partner</p>
+                  <p className="text-xs text-gray-500">Asia & Company Partner</p>
                 </div>
               </div>
               <button
@@ -287,14 +287,14 @@ const VendorLayout = ({ children }) => {
                 <Link to="/vendor/profile#bank" className="block hover:text-white transition-colors">Bank Details</Link>
                 <Link to="/vendor/profile#kyc" className="block hover:text-white transition-colors">KYC Verification</Link>
                 <Link to="/vendor/settings" className="block hover:text-white transition-colors">Account Settings</Link>
-                <p className="pt-2">Support: vendor@driveease.com</p>
-                <p>Phone: +1 (555) 123-4567</p>
+                <p className="pt-2">Support: support@asiaandcompanyselfdrive.com</p>
+                <p>Phone: +91 75260 51009</p>
               </div>
             </div>
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 DriveEase Vendor Portal. All rights reserved.</p>
+            <p>&copy; 2025 Asia & Comapany Self Drive Vendor Portal. All rights reserved.</p>
           </div>
         </div>
       </footer>
